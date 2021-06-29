@@ -3,8 +3,14 @@
 
 #include "framework.h"
 #include "DefenceGame - WinAPI.h"
+#include <tchar.h>
+
+//custom header
+#include "DefenceGame.h"
 
 #define MAX_LOADSTRING 100
+#define TIMER1 1001
+#define TIMER2 1002
 
 // 전역 변수:
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
@@ -123,6 +129,19 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	const int ID_size = 15;
+	static SIZE size;
+	static DefenceGame game;
+	static TCHAR name[5][ID_size] = { {0}, {0} , {0}, {0},{0} };
+	static int score[5] = { 0,0,0,0,0 };
+	static int ID_itr = 0;
+	static int Screen_flag = 1;
+	static RECT rectview;
+	static RECT ID_rect;
+
+
+
+
     switch (message)
     {
     case WM_COMMAND:
@@ -142,15 +161,113 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
+	case WM_CREATE:
+	{
+		HANDLE hFile;
+		GetClientRect(hWnd, &rectview);
+		CreateCaret(hWnd, NULL, 5, 15);
+		ShowCaret(hWnd);
+	}
+	break; 
+	case WM_TIMER:
+	{
+		if (wParam == TIMER1)
+		{
+			game.Update(rectview);
+			if (game.getHP() == 0)
+			{
+				Screen_flag = 3;
+				KillTimer(hWnd,TIMER1);
+				KillTimer(hWnd,TIMER2);
+ 				game.Save(name, score);
+			}
+		}
+		else if (wParam == TIMER2)
+			game.make_Enemy(rectview, 10);
+
+
+
+		InvalidateRect(hWnd, NULL, true);
+	}
+	break;
+	case WM_KEYDOWN:
+	{
+		if (Screen_flag == 1)
+		{
+
+			if (wParam == VK_BACK)
+			{
+				if (ID_itr >= 0)
+				{
+					game.set_ID()[ID_itr] = NULL;
+					if (ID_itr > 0)
+						ID_itr--;
+				}
+			}
+			else if (wParam == VK_RETURN)
+			{
+				Screen_flag = 2;
+				SetTimer(hWnd, TIMER1, 1, NULL);
+				SetTimer(hWnd, TIMER2, 500, NULL);
+				HideCaret(hWnd);
+				DestroyCaret();
+
+				game.make_Wall(rectview, 100, 50);
+				game.make_Cannon(rectview, 50, 50);
+			}
+			else
+			{
+				if (ID_itr == 14)
+					break;
+				game.set_ID()[ID_itr] = wParam;
+				ID_itr++;
+			}
+		}
+		else if (Screen_flag == 2)
+		{
+			if (wParam == VK_LEFT)
+				game.MoveCannon(false);
+			else if (wParam == VK_RIGHT)
+				game.MoveCannon(true);
+			else if (wParam == VK_SPACE)
+				game.ShootCannon(5);
+		}
+		else if (Screen_flag == 3)
+		{
+			if (wParam == VK_RETURN)
+				exit(0);
+		}
+
+		InvalidateRect(hWnd, NULL, true);
+
+
+
+	}
+	break;
     case WM_PAINT:
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
             // TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
+			if (Screen_flag == 1)
+			{
+				game.ID_Screen(hdc, rectview, size);
+			}
+			else if (Screen_flag == 2)
+			{
+				game.Game_Screen(hdc, rectview);
+			}
+			else if (Screen_flag == 3)
+			{
+				game.Record_Screen(hdc, rectview, name, score);
+			}
+
+
             EndPaint(hWnd, &ps);
         }
         break;
     case WM_DESTROY:
+		KillTimer(hWnd, 1);
         PostQuitMessage(0);
         break;
     default:

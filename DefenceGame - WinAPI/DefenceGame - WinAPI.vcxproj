@@ -152,12 +152,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DefenceGame - WinAPI.h" />
+    <ClInclude Include="DefenceGame.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DefenceGame - WinAPI.cpp" />
+    <ClCompile Include="DefenceGame.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DefenceGame - WinAPI.rc" />
