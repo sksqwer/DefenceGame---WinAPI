@@ -68,6 +68,13 @@ void DefenceGame::Record_Screen(HDC & hdc, RECT & rectview, TCHAR name[][15], in
 	TextOut(hdc, rectview.right / 2 - 10, rectview.bottom / 2 - 20, ID, _tcslen(ID));
 	TextOut(hdc, rectview.right / 2 + 65, rectview.bottom / 2 - 20, SCORE, _tcslen(SCORE));
 
+
+	for (int i = 0; i < 5; i++)
+	{
+
+	}
+
+
 	memset(SCORE, 0, sizeof(SCORE));
 	_itot_s(score[0], SCORE, _countof(SCORE), 10);
 	TextOut(hdc, rectview.right / 2 - 155, rectview.bottom / 2 + 5, _T("    1À§    "), _tcslen(_T("    1À§    ")));
